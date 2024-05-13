@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include "edge.h"
 
 using std::cout;
 using std::endl;
 using std::map;
+using std::unordered_map;
 using std::vector;
 
 template <class G>
@@ -18,6 +20,7 @@ private:
     typedef typename G::E E;
     typedef typename G::node node;
     typedef typename G::edge edge;
+    typedef typename G::eiterator eiterator;
 
     vector<node *> nodes;
     unsigned quantityVertices;
@@ -33,7 +36,7 @@ public:
     bool remove(N, N);
     bool remove(N);
 
-    void depthFirstSearch(int, unordered_map<int, bool> &);
+    void depthFirstSearch(N, unordered_map<N, bool> &);
     unsigned connectedComponents();
 
     unsigned qVertices();
@@ -159,12 +162,24 @@ unsigned Graph<G>::qEdges()
 }
 
 template <class G>
-void Graph<G>::depthFirstSearch(int vertex, unordered_map<int, bool> &visited)
+void Graph<G>::depthFirstSearch(N vertex, unordered_map<N, bool> &visited)
 {
+    unsigned index;
+    find(vertex, index);
     visited[vertex] = true;
-    for (unsigned i = 0; i < graph->qVertices(); i++)
+
+    eiterator it;
+    node *nodeTmp = nodes[index];
+    for (it = nodeTmp->edges.begin(); it != nodeTmp->edges.end(); it++)
     {
-        // Iterator Between Edge List
+        if (!visited[(*it)->nodes[0]->data])
+        {
+            depthFirstSearch((*it)->nodes[0]->data, visited);
+        }
+        if (!visited[(*it)->nodes[1]->data])
+        {
+            depthFirstSearch((*it)->nodes[1]->data, visited);
+        }
     }
 }
 
@@ -173,16 +188,16 @@ unsigned Graph<G>::connectedComponents()
 {
     unsigned components = 0;
     unordered_map<int, bool> visited;
-    for (unsigned i = 0; i < graph->qVertices(); i++)
+    for (unsigned i = 0; i < qVertices(); i++)
     {
-        visited[graph->nodes[i]->data] = false;
+        visited[nodes[i]->data] = false;
     }
 
-    for (unsigned i = 0; i < graph->qVertices(); i++)
+    for (unsigned i = 0; i < qVertices(); i++)
     {
-        if (!visited[graph->nodes[i]->data])
+        if (!visited[nodes[i]->data])
         {
-            // depthFirstSearch(_graph->nodes[i]->data, _graph, visited);
+            depthFirstSearch(nodes[i]->data, visited);
             components += 1;
         }
     }
